@@ -7,20 +7,32 @@
   <style>
     * { box-sizing: border-box; }
 
+    :root {
+      --blue: #245fea;
+      --blue-dark: #1744b8;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e5eaf3;
+      --soft: #f6f8fc;
+      --card: #ffffff;
+    }
+
     body {
       margin: 0;
       font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f4f7fb;
-      color: #111827;
+      background:
+        radial-gradient(circle at top left, rgba(36, 95, 234, 0.12), transparent 34%),
+        linear-gradient(180deg, #f8fbff 0%, #eef3f9 100%);
+      color: var(--ink);
     }
 
     .page {
       min-height: 100vh;
-      padding: 32px;
+      padding: 30px;
     }
 
     .shell {
-      max-width: 1120px;
+      max-width: 1160px;
       margin: 0 auto;
     }
 
@@ -28,87 +40,162 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 28px;
+      margin-bottom: 22px;
     }
 
-    .brand {
-      font-size: 22px;
-      font-weight: 850;
-      letter-spacing: -0.04em;
+    .logo {
+  font-family: "Manrope", sans-serif;
+  font-size: 38px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: #111;
+}
+
+    .sublogo {
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 650;
     }
 
     .pill {
-      padding: 8px 12px;
+      padding: 9px 13px;
       border-radius: 999px;
-      background: #eaf0ff;
-      color: #245fea;
+      background: white;
+      border: 1px solid var(--line);
+      color: var(--blue);
       font-size: 13px;
-      font-weight: 750;
+      font-weight: 800;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+    }
+
+    .status {
+      padding: 18px;
+      background: white;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-weight: 700;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+    }
+
+    .error {
+      background: #fff1f2;
+      border-color: #fecdd3;
+      color: #be123c;
     }
 
     .hero {
-      background: linear-gradient(135deg, #245fea 0%, #5b7cfa 100%);
-      border-radius: 28px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #10245c 0%, #245fea 58%, #6b86ff 100%);
+      border-radius: 30px;
       padding: 34px;
       color: white;
-      box-shadow: 0 24px 60px rgba(36, 95, 234, 0.22);
-      margin-bottom: 24px;
+      box-shadow: 0 26px 70px rgba(36, 95, 234, 0.25);
+      margin-bottom: 18px;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.13);
+      right: -110px;
+      top: -120px;
+    }
+
+    .hero-top {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
     }
 
     .hero h1 {
       margin: 0 0 10px;
       font-size: clamp(34px, 5vw, 56px);
-      letter-spacing: -0.06em;
-      line-height: 1;
+      letter-spacing: -0.065em;
+      line-height: 0.96;
     }
 
     .hero p {
       margin: 0;
       opacity: 0.9;
-      font-size: 17px;
-      line-height: 1.45;
-      max-width: 680px;
+      font-size: 16px;
+      line-height: 1.5;
+      max-width: 650px;
+    }
+
+    .hero-badge {
+      white-space: nowrap;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.20);
+      font-size: 13px;
+      font-weight: 800;
     }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
+      gap: 14px;
+      margin-bottom: 18px;
     }
 
     .card {
-      background: white;
-      border: 1px solid #e5eaf3;
-      border-radius: 22px;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--line);
+      border-radius: 24px;
       padding: 22px;
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.055);
+      backdrop-filter: blur(10px);
+    }
+
+    .card.highlight {
+      border-color: rgba(36, 95, 234, 0.22);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
     }
 
     .label {
-      color: #64748b;
-      font-size: 13px;
-      font-weight: 750;
-      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 9px;
     }
 
     .value {
-      font-size: 28px;
-      font-weight: 850;
-      letter-spacing: -0.04em;
+      font-size: 29px;
+      font-weight: 900;
+      letter-spacing: -0.055em;
+      line-height: 1.1;
+    }
+
+    .helper {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      margin-top: 8px;
     }
 
     .two-col {
       display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 16px;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 14px;
     }
 
     .linkbox {
       padding: 14px;
-      background: #f8fafc;
-      border: 1px solid #e5eaf3;
-      border-radius: 16px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 17px;
       font-size: 14px;
       word-break: break-all;
       color: #334155;
@@ -118,71 +205,83 @@
 
     .code {
       display: inline-flex;
-      padding: 10px 14px;
-      border-radius: 14px;
+      padding: 11px 15px;
+      border-radius: 15px;
       background: #111827;
       color: white;
-      font-weight: 850;
-      letter-spacing: 0.04em;
+      font-weight: 900;
+      letter-spacing: 0.045em;
       margin-top: 10px;
     }
 
     .message {
-      padding: 16px;
+      padding: 15px;
       border-radius: 18px;
-      background: #f8fafc;
-      border: 1px solid #e5eaf3;
+      background: var(--soft);
+      border: 1px solid var(--line);
     }
 
-    .message + .message {
-      margin-top: 10px;
-    }
+    .message + .message { margin-top: 10px; }
 
     .message h3 {
-      margin: 0 0 8px;
-      font-size: 17px;
+      margin: 0 0 7px;
+      font-size: 16px;
+      letter-spacing: -0.02em;
     }
 
     .message p {
       margin: 0;
       color: #475569;
       line-height: 1.5;
+      font-size: 14px;
     }
 
-    .status {
-      padding: 18px;
-      background: white;
-      border-radius: 18px;
-      border: 1px solid #e5eaf3;
-      color: #64748b;
-      font-weight: 650;
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+    .last-order {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
     }
 
-    .error {
-      background: #fff1f2;
-      border-color: #fecdd3;
-      color: #be123c;
+    .mini {
+      padding: 13px;
+      border-radius: 17px;
+      background: var(--soft);
+      border: 1px solid var(--line);
     }
 
-    @media (max-width: 850px) {
+    .mini strong {
+      display: block;
+      font-size: 15px;
+      margin-top: 4px;
+      letter-spacing: -0.02em;
+    }
+
+    @media (max-width: 900px) {
       .page { padding: 18px; }
       .grid { grid-template-columns: 1fr 1fr; }
       .two-col { grid-template-columns: 1fr; }
-      .topbar { align-items: flex-start; gap: 12px; flex-direction: column; }
+      .hero-top { flex-direction: column; }
+      .last-order { grid-template-columns: 1fr; }
     }
 
-    @media (max-width: 520px) {
+    @media (max-width: 540px) {
       .grid { grid-template-columns: 1fr; }
-      .hero { padding: 24px; border-radius: 22px; }
+      .topbar { align-items: flex-start; gap: 12px; flex-direction: column; }
+      .hero { padding: 24px; border-radius: 24px; }
+      .logo { font-size: 30px; }
     }
   </style>
 </head>
+
 <body>
   <main class="page">
     <div class="shell">
       <div class="topbar">
-        <div class="brand">Taxoma Partner Dashboard</div>
+        <div>
+          <div class="logo">Taxoma</div>
+          <div class="sublogo">Partner dashboard</div>
+        </div>
         <div class="pill" id="partnerRef">Načítám…</div>
       </div>
 
@@ -199,7 +298,7 @@
     const content = document.getElementById("content")
     const partnerRef = document.getElementById("partnerRef")
 
-    function formatCzkFromCents(value) {
+    function money(value) {
       const number = Number(value || 0) / 100
       return new Intl.NumberFormat("cs-CZ", {
         style: "currency",
@@ -210,13 +309,9 @@
 
     function normalizeMessages(messages) {
       if (!messages) return []
-
       if (Array.isArray(messages)) return messages
-
       if (messages.data) return [messages.data]
-
       if (messages.Record) return [messages.Record]
-
       return []
     }
 
@@ -229,6 +324,15 @@
         .replaceAll("'", "&#039;")
     }
 
+    function serviceName(type) {
+      const value = String(type || "").toLowerCase()
+
+      if (value.includes("register") || value.includes("registrace")) return "Registrace IO"
+      if (value.includes("vat_return") || value.includes("priznani") || value.includes("přiznání")) return "Přiznání k DPH"
+
+      return type || "Zatím není"
+    }
+
     async function loadDashboard() {
       try {
         const res = await fetch(`/api/get-partner-data?ref=${encodeURIComponent(ref)}`)
@@ -239,6 +343,8 @@
         }
 
         const partner = data.partner || {}
+        const stats = data.stats || {}
+        const lastOrder = data.last_order || {}
         const messages = normalizeMessages(data.messages)
 
         partnerRef.textContent = `ref: ${partner.ref || ref}`
@@ -255,26 +361,38 @@
         content.className = ""
         content.innerHTML = `
           <section class="hero">
-            <h1>${escapeHtml(partner.name || "Partner")}</h1>
-            <p>Přehled affiliate odkazu, slevového kódu, provizí a zpráv od Taxomy.</p>
+            <div class="hero-top">
+              <div>
+                <h1>${escapeHtml(partner.name || "Partner")}</h1>
+                <p>Přehled provizí, objednávek a referral odkazu. Čísla se aktualizují podle zaplacených objednávek.</p>
+              </div>
+              <div class="hero-badge">Aktivní partner</div>
+            </div>
           </section>
 
           <section class="grid">
-            <div class="card">
+            <div class="card highlight">
               <div class="label">Čekající provize</div>
-              <div class="value">${formatCzkFromCents(data.stats?.pending || 0)}</div>
+              <div class="value">${money(stats.pending)}</div>
+              <div class="helper">Čeká na schválení</div>
             </div>
+
             <div class="card">
               <div class="label">Schválené provize</div>
-              <div class="value">${formatCzkFromCents(data.stats?.approved || 0)}</div>
+              <div class="value">${money(stats.approved)}</div>
+              <div class="helper">Připraveno k vyplacení</div>
             </div>
+
             <div class="card">
               <div class="label">Vyplaceno</div>
-              <div class="value">${formatCzkFromCents(data.stats?.paid || 0)}</div>
+              <div class="value">${money(stats.paid)}</div>
+              <div class="helper">Už odesláno partnerovi</div>
             </div>
+
             <div class="card">
               <div class="label">Objednávky</div>
-              <div class="value">${data.stats?.orders_total || 0}</div>
+              <div class="value">${Number(stats.orders_total || 0)}</div>
+              <div class="helper">Celkem přes referral</div>
             </div>
           </section>
 
@@ -287,6 +405,24 @@
 
               <div class="label">Slevový kód</div>
               <div class="code">${escapeHtml(partner.discount_code || "Není nastaveno")}</div>
+
+              <div style="height:22px"></div>
+
+              <div class="label">Poslední objednávka</div>
+              <div class="last-order">
+                <div class="mini">
+                  <div class="helper">Datum</div>
+                  <strong>${escapeHtml(lastOrder.at || "Zatím žádná")}</strong>
+                </div>
+                <div class="mini">
+                  <div class="helper">Typ služby</div>
+                  <strong>${escapeHtml(serviceName(lastOrder.type))}</strong>
+                </div>
+                <div class="mini">
+                  <div class="helper">Provize</div>
+                  <strong>${money(lastOrder.commission_amount)}</strong>
+                </div>
+              </div>
             </div>
 
             <div class="card">
