@@ -16,8 +16,6 @@
       --muted: #64748b;
       --line: #e5eaf3;
       --soft: #f6f8fc;
-      --danger: #be123c;
-      --danger-bg: #fff1f2;
     }
 
     body {
@@ -44,7 +42,7 @@
       font-family: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 38px;
       font-weight: 600;
-      letter-spacing: -0.035em;
+      letter-spacing: -0.04em;
       color: #111;
       line-height: 1;
     }
@@ -99,6 +97,59 @@
       color: var(--muted);
       font-weight: 700;
       box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+    }
+
+    .welcome-wrap {
+      min-height: 72vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .welcome-card {
+      max-width: 720px;
+      padding: 46px 34px;
+      border-radius: 34px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid rgba(229,234,243,0.9);
+      box-shadow: 0 28px 80px rgba(15, 23, 42, 0.075);
+      backdrop-filter: blur(14px);
+    }
+
+    .welcome-logo {
+      font-family: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: clamp(58px, 9vw, 86px);
+      font-weight: 600;
+      letter-spacing: -0.075em;
+      line-height: 0.9;
+      color: #111111;
+      margin-bottom: 10px;
+    }
+
+    .welcome-sublogo {
+      font-size: 15px;
+      font-weight: 750;
+      color: var(--muted);
+      margin-bottom: 42px;
+    }
+
+    .welcome-title {
+      font-size: clamp(32px, 5vw, 48px);
+      line-height: 1.02;
+      font-weight: 900;
+      letter-spacing: -0.06em;
+      color: var(--ink);
+      margin-bottom: 18px;
+    }
+
+    .welcome-text {
+      font-size: 18px;
+      line-height: 1.75;
+      color: var(--muted);
+      max-width: 620px;
+      margin: 0 auto;
     }
 
     .hero {
@@ -329,6 +380,9 @@
       .hero { padding: 24px; border-radius: 24px; }
       .logo { font-size: 30px; }
       .orders-table { font-size: 13px; }
+      .welcome-card { padding: 34px 22px; border-radius: 28px; }
+      .welcome-sublogo { margin-bottom: 32px; }
+      .welcome-text { font-size: 16px; }
     }
   </style>
 </head>
@@ -358,7 +412,7 @@
 
   <script>
     const params = new URLSearchParams(window.location.search)
-    const ref = params.get("ref") || "test"
+    const ref = params.get("ref")
     const lang = params.get("lang") || "cs"
     const selectedPeriod = params.get("period") || currentPeriod()
 
@@ -400,6 +454,8 @@
         noOrders: "V tomto období zatím nejsou žádné objednávky.",
         backendUnavailableTitle: "Dashboard je dočasně nedostupný",
         backendUnavailableText: "Nepodařilo se načíst data z backendu. Zkus stránku obnovit za chvíli.",
+        welcomeTitle: "Vítej v partnerském programu",
+        welcomeText: "Do svého dashboardu musíš vstoupit přes svoji unikátní partnerskou URL.",
         loadError: "Nepodařilo se načíst dashboard"
       },
       uk: {
@@ -439,6 +495,8 @@
         noOrders: "У цьому періоді поки немає замовлень.",
         backendUnavailableTitle: "Панель тимчасово недоступна",
         backendUnavailableText: "Не вдалося завантажити дані з бекенду. Спробуйте оновити сторінку пізніше.",
+        welcomeTitle: "Ласкаво просимо до партнерської програми",
+        welcomeText: "Щоб відкрити свій dashboard, потрібно перейти за своїм унікальним партнерським посиланням.",
         loadError: "Не вдалося завантажити панель"
       }
     }
@@ -455,7 +513,7 @@
     const ukBtn = document.getElementById("ukBtn")
 
     content.textContent = t.loading
-    partnerRef.textContent = t.loading
+    partnerRef.textContent = ref ? `ref: ${ref}` : ""
 
     csBtn.classList.toggle("active", lang === "cs")
     ukBtn.classList.toggle("active", lang === "uk")
@@ -504,9 +562,14 @@
 
     function updateUrl(changes) {
       const next = new URLSearchParams(window.location.search)
-      next.set("ref", ref)
+
+      if (ref) next.set("ref", ref)
       next.set("lang", changes.lang || lang)
-      next.set("period", changes.period || selectedPeriod)
+
+      if (ref) {
+        next.set("period", changes.period || selectedPeriod)
+      }
+
       window.location.search = next.toString()
     }
 
@@ -617,8 +680,30 @@
       `
     }
 
+    function renderWelcome() {
+      periodSelect.style.display = "none"
+      partnerRef.style.display = "none"
+      content.className = ""
+
+      content.innerHTML = `
+        <div class="welcome-wrap">
+          <div class="welcome-card">
+            <div class="welcome-logo">Taxoma</div>
+            <div class="welcome-sublogo">${t.dashboardSubtitle}</div>
+            <div class="welcome-title">${t.welcomeTitle}</div>
+            <div class="welcome-text">${t.welcomeText}</div>
+          </div>
+        </div>
+      `
+    }
+
     async function loadDashboard() {
       setupPeriodSelect()
+
+      if (!ref) {
+        renderWelcome()
+        return
+      }
 
       try {
         const apiUrl = `/api/get-partner-data?ref=${encodeURIComponent(ref)}&period=${encodeURIComponent(selectedPeriod)}`
