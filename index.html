@@ -38,6 +38,12 @@
       margin-bottom: 22px;
     }
 
+    .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
     .logo {
       font-family: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 38px;
@@ -52,6 +58,7 @@
       font-size: 13px;
       color: var(--muted);
       font-weight: 650;
+      text-align: center;
     }
 
     .top-actions {
@@ -116,23 +123,11 @@
       border: 1px solid rgba(229,234,243,0.9);
       box-shadow: 0 28px 80px rgba(15, 23, 42, 0.075);
       backdrop-filter: blur(14px);
-    }
-
-    .welcome-logo {
-      font-family: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: clamp(58px, 9vw, 86px);
-      font-weight: 600;
-      letter-spacing: -0.075em;
-      line-height: 0.9;
-      color: #111111;
-      margin-bottom: 10px;
-    }
-
-    .welcome-sublogo {
-      font-size: 15px;
-      font-weight: 750;
-      color: var(--muted);
-      margin-bottom: 42px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 260px;
     }
 
     .welcome-title {
@@ -141,7 +136,8 @@
       font-weight: 900;
       letter-spacing: -0.06em;
       color: var(--ink);
-      margin-bottom: 18px;
+      margin-bottom: 22px;
+      text-align: center;
     }
 
     .welcome-text {
@@ -150,6 +146,7 @@
       color: var(--muted);
       max-width: 620px;
       margin: 0 auto;
+      text-align: center;
     }
 
     .hero {
@@ -371,8 +368,8 @@
       .two-col { grid-template-columns: 1fr; }
       .hero-top { flex-direction: column; }
       .last-order { grid-template-columns: 1fr; }
-      .topbar { align-items: flex-start; flex-direction: column; }
-      .top-actions { justify-content: flex-start; }
+      .topbar { align-items: center; flex-direction: column; }
+      .top-actions { justify-content: center; }
     }
 
     @media (max-width: 540px) {
@@ -381,7 +378,6 @@
       .logo { font-size: 30px; }
       .orders-table { font-size: 13px; }
       .welcome-card { padding: 34px 22px; border-radius: 28px; }
-      .welcome-sublogo { margin-bottom: 32px; }
       .welcome-text { font-size: 16px; }
     }
   </style>
@@ -391,7 +387,7 @@
   <main class="page">
     <div class="shell">
       <div class="topbar">
-        <div>
+        <div class="brand">
           <div class="logo">Taxoma</div>
           <div class="sublogo" id="subtitle">Partner dashboard</div>
         </div>
@@ -688,8 +684,6 @@
       content.innerHTML = `
         <div class="welcome-wrap">
           <div class="welcome-card">
-            <div class="welcome-logo">Taxoma</div>
-            <div class="welcome-sublogo">${t.dashboardSubtitle}</div>
             <div class="welcome-title">${t.welcomeTitle}</div>
             <div class="welcome-text">${t.welcomeText}</div>
           </div>
