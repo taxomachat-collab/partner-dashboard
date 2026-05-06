@@ -76,10 +76,8 @@
     }
 
     .select {
-      appearance: none;
       cursor: pointer;
       color: var(--ink);
-      padding-right: 30px;
     }
 
     .lang-btn {
@@ -101,12 +99,6 @@
       color: var(--muted);
       font-weight: 700;
       box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
-    }
-
-    .error {
-      background: var(--danger-bg);
-      border-color: #fecdd3;
-      color: var(--danger);
     }
 
     .hero {
@@ -406,6 +398,8 @@
         lifetimePending: "čekající provize",
         orderHistory: "Historie objednávek",
         noOrders: "V tomto období zatím nejsou žádné objednávky.",
+        backendUnavailableTitle: "Dashboard je dočasně nedostupný",
+        backendUnavailableText: "Nepodařilo se načíst data z backendu. Zkus stránku obnovit za chvíli.",
         loadError: "Nepodařilo se načíst dashboard"
       },
       uk: {
@@ -443,6 +437,8 @@
         lifetimePending: "очікувані комісії",
         orderHistory: "Історія замовлень",
         noOrders: "У цьому періоді поки немає замовлень.",
+        backendUnavailableTitle: "Панель тимчасово недоступна",
+        backendUnavailableText: "Не вдалося завантажити дані з бекенду. Спробуйте оновити сторінку пізніше.",
         loadError: "Не вдалося завантажити панель"
       }
     }
@@ -489,6 +485,7 @@
     function periodLabel(period) {
       const [year, month] = String(period || currentPeriod()).split("-")
       const date = new Date(Number(year), Number(month) - 1, 1)
+
       return new Intl.DateTimeFormat(lang === "uk" ? "uk-UA" : "cs-CZ", {
         month: "long",
         year: "numeric"
@@ -497,6 +494,7 @@
 
     function setupPeriodSelect() {
       const periods = generatePeriods()
+
       periodSelect.innerHTML = periods.map(p => `
         <option value="${p}" ${p === selectedPeriod ? "selected" : ""}>${periodLabel(p)}</option>
       `).join("")
@@ -519,6 +517,7 @@
 
     function money(value) {
       const number = safeNumber(value) / 100
+
       return new Intl.NumberFormat(lang === "uk" ? "uk-UA" : "cs-CZ", {
         style: "currency",
         currency: "CZK",
@@ -529,8 +528,19 @@
     function normalizeArray(value) {
       if (!value) return []
       if (Array.isArray(value)) return value
-      if (value.data) return Array.isArray(value.data) ? value.data : [value.data]
-      if (value.Record) return Array.isArray(value.Record) ? value.Record : [value.Record]
+
+      if (value.data) {
+        return Array.isArray(value.data) ? value.data : [value.data]
+      }
+
+      if (value.Record) {
+        return Array.isArray(value.Record) ? value.Record : [value.Record]
+      }
+
+      if (value.record) {
+        return Array.isArray(value.record) ? value.record : [value.record]
+      }
+
       return []
     }
 
@@ -608,12 +618,19 @@
     }
 
     async function loadDashboard() {
-      try {
-        setupPeriodSelect()
+      setupPeriodSelect()
 
+      try {
         const apiUrl = `/api/get-partner-data?ref=${encodeURIComponent(ref)}&period=${encodeURIComponent(selectedPeriod)}`
         const res = await fetch(apiUrl)
-        const data = await res.json()
+
+        let data = null
+
+        try {
+          data = await res.json()
+        } catch (jsonError) {
+          throw new Error("invalid_json")
+        }
 
         if (!res.ok || data.error) {
           throw new Error(data.error || t.loadError)
@@ -725,8 +742,20 @@
           </section>
         `
       } catch (err) {
-        content.className = "status error"
-        content.textContent = err.message || t.loadError
+        console.error(err)
+
+        partnerRef.textContent = `ref: ${ref}`
+        content.className = "status"
+
+        content.innerHTML = `
+          <div style="font-size:18px;font-weight:800;margin-bottom:8px;color:#0f172a;">
+            ${t.backendUnavailableTitle}
+          </div>
+
+          <div style="color:#64748b;line-height:1.6;">
+            ${t.backendUnavailableText}
+          </div>
+        `
       }
     }
 
