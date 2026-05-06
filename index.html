@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Taxoma Partner Dashboard</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+
   <style>
     * { box-sizing: border-box; }
 
@@ -44,12 +47,13 @@
     }
 
     .logo {
-  font-family: "Manrope", sans-serif;
-  font-size: 38px;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  color: #111;
-}
+      font-family: "Manrope", -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 38px;
+      font-weight: 600;
+      letter-spacing: -0.035em;
+      color: #111;
+      line-height: 1;
+    }
 
     .sublogo {
       margin-top: 6px;
@@ -257,6 +261,13 @@
       letter-spacing: -0.02em;
     }
 
+    .lifetime-note {
+      margin-top: 14px;
+      color: rgba(255,255,255,0.78);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
     @media (max-width: 900px) {
       .page { padding: 18px; }
       .grid { grid-template-columns: 1fr 1fr; }
@@ -280,7 +291,7 @@
       <div class="topbar">
         <div>
           <div class="logo">Taxoma</div>
-          <div class="sublogo">Partner dashboard</div>
+          <div class="sublogo" id="subtitle">Partner dashboard</div>
         </div>
         <div class="pill" id="partnerRef">Načítám…</div>
       </div>
@@ -294,13 +305,93 @@
   <script>
     const params = new URLSearchParams(window.location.search)
     const ref = params.get("ref") || "test"
+    const lang = params.get("lang") || "cs"
+
+    const translations = {
+      cs: {
+        loading: "Načítám data partnera…",
+        dashboardSubtitle: "Partner dashboard",
+        activePartner: "Aktivní partner",
+        heroText: "Přehled provizí, objednávek a referral odkazu. Čísla se zobrazují pro vybrané období.",
+        pending: "Čekající provize",
+        pendingHelp: "Čeká na schválení",
+        approved: "Schválené provize",
+        approvedHelp: "Připraveno k vyplacení",
+        paid: "Vyplaceno",
+        paidHelp: "Už odesláno partnerovi",
+        orders: "Objednávky",
+        ordersHelp: "Za vybrané období",
+        referralLink: "Referral odkaz",
+        discountCode: "Slevový kód",
+        lastOrder: "Poslední objednávka",
+        date: "Datum",
+        serviceType: "Typ služby",
+        commission: "Provize",
+        noLastOrder: "Zatím žádná",
+        notSet: "Není nastaveno",
+        messages: "Zprávy",
+        noMessages: "Žádné zprávy",
+        noMessagesText: "Zatím tu nejsou žádné aktuality.",
+        messageFallback: "Zpráva",
+        vatReturn: "Přiznání k DPH",
+        registration: "Registrace IO",
+        lifetime: "Celkem od začátku",
+        lifetimeOrders: "objednávek",
+        lifetimePending: "čekající provize",
+        loadError: "Nepodařilo se načíst dashboard"
+      },
+      uk: {
+        loading: "Завантаження даних партнера…",
+        dashboardSubtitle: "Партнерська панель",
+        activePartner: "Активний партнер",
+        heroText: "Огляд комісій, замовлень і реферального посилання. Дані показуються для вибраного періоду.",
+        pending: "Очікувані комісії",
+        pendingHelp: "Очікує підтвердження",
+        approved: "Підтверджені комісії",
+        approvedHelp: "Готово до виплати",
+        paid: "Виплачено",
+        paidHelp: "Вже виплачено партнеру",
+        orders: "Замовлення",
+        ordersHelp: "За вибраний період",
+        referralLink: "Реферальне посилання",
+        discountCode: "Промокод",
+        lastOrder: "Останнє замовлення",
+        date: "Дата",
+        serviceType: "Тип послуги",
+        commission: "Комісія",
+        noLastOrder: "Поки немає",
+        notSet: "Не налаштовано",
+        messages: "Повідомлення",
+        noMessages: "Немає повідомлень",
+        noMessagesText: "Поки що немає новин.",
+        messageFallback: "Повідомлення",
+        vatReturn: "Декларація з ПДВ",
+        registration: "Реєстрація IO",
+        lifetime: "Загалом від початку",
+        lifetimeOrders: "замовлень",
+        lifetimePending: "очікувані комісії",
+        loadError: "Не вдалося завантажити панель"
+      }
+    }
+
+    const t = translations[lang] || translations.cs
+
+    document.documentElement.lang = lang
+    document.getElementById("subtitle").textContent = t.dashboardSubtitle
 
     const content = document.getElementById("content")
     const partnerRef = document.getElementById("partnerRef")
+    content.textContent = t.loading
+    partnerRef.textContent = t.loading
+
+    function safeNumber(value) {
+      const number = Number(value)
+      return Number.isFinite(number) ? number : 0
+    }
 
     function money(value) {
-      const number = Number(value || 0) / 100
-      return new Intl.NumberFormat("cs-CZ", {
+      const number = safeNumber(value) / 100
+      return new Intl.NumberFormat(lang === "uk" ? "uk-UA" : "cs-CZ", {
         style: "currency",
         currency: "CZK",
         maximumFractionDigits: 0
@@ -327,24 +418,34 @@
     function serviceName(type) {
       const value = String(type || "").toLowerCase()
 
-      if (value.includes("register") || value.includes("registrace")) return "Registrace IO"
-      if (value.includes("vat_return") || value.includes("priznani") || value.includes("přiznání")) return "Přiznání k DPH"
+      if (value.includes("register") || value.includes("registrace") || value.includes("registration")) return t.registration
+      if (value.includes("vat_return") || value.includes("priznani") || value.includes("přiznání")) return t.vatReturn
 
-      return type || "Zatím není"
+      return type || t.noLastOrder
     }
 
     async function loadDashboard() {
       try {
-        const res = await fetch(`/api/get-partner-data?ref=${encodeURIComponent(ref)}`)
+        const period = params.get("period") || ""
+        const apiUrl = `/api/get-partner-data?ref=${encodeURIComponent(ref)}${period ? `&period=${encodeURIComponent(period)}` : ""}`
+
+        const res = await fetch(apiUrl)
         const data = await res.json()
 
         if (!res.ok || data.error) {
-          throw new Error(data.error || "Nepodařilo se načíst dashboard")
+          throw new Error(data.error || t.loadError)
         }
 
         const partner = data.partner || {}
-        const stats = data.stats || {}
-        const lastOrder = data.last_order || {}
+        const lifetimeStats = data.lifetime_stats || {}
+        const periodStats = data.period_stats || {}
+
+        const lastOrder = {
+          at: periodStats.last_order_at || "",
+          type: periodStats.last_order_type || "",
+          commission_amount: periodStats.last_commission_amount || 0
+        }
+
         const messages = normalizeMessages(data.messages)
 
         partnerRef.textContent = `ref: ${partner.ref || ref}`
@@ -352,11 +453,11 @@
         const messageHtml = messages.length
           ? messages.map(m => `
               <div class="message">
-                <h3>${escapeHtml(m.title || "Zpráva")}</h3>
+                <h3>${escapeHtml(m.title || t.messageFallback)}</h3>
                 <p>${escapeHtml(m.message || "")}</p>
               </div>
             `).join("")
-          : `<div class="message"><h3>Žádné zprávy</h3><p>Zatím tu nejsou žádné aktuality.</p></div>`
+          : `<div class="message"><h3>${t.noMessages}</h3><p>${t.noMessagesText}</p></div>`
 
         content.className = ""
         content.innerHTML = `
@@ -364,76 +465,79 @@
             <div class="hero-top">
               <div>
                 <h1>${escapeHtml(partner.name || "Partner")}</h1>
-                <p>Přehled provizí, objednávek a referral odkazu. Čísla se aktualizují podle zaplacených objednávek.</p>
+                <p>${t.heroText}</p>
+                <div class="lifetime-note">
+                  ${t.lifetime}: ${safeNumber(lifetimeStats.orders_total)} ${t.lifetimeOrders} · ${money(lifetimeStats.pending)} ${t.lifetimePending}
+                </div>
               </div>
-              <div class="hero-badge">Aktivní partner</div>
+              <div class="hero-badge">${t.activePartner}</div>
             </div>
           </section>
 
           <section class="grid">
             <div class="card highlight">
-              <div class="label">Čekající provize</div>
-              <div class="value">${money(stats.pending)}</div>
-              <div class="helper">Čeká na schválení</div>
+              <div class="label">${t.pending}</div>
+              <div class="value">${money(periodStats.pending)}</div>
+              <div class="helper">${t.pendingHelp}</div>
             </div>
 
             <div class="card">
-              <div class="label">Schválené provize</div>
-              <div class="value">${money(stats.approved)}</div>
-              <div class="helper">Připraveno k vyplacení</div>
+              <div class="label">${t.approved}</div>
+              <div class="value">${money(periodStats.approved)}</div>
+              <div class="helper">${t.approvedHelp}</div>
             </div>
 
             <div class="card">
-              <div class="label">Vyplaceno</div>
-              <div class="value">${money(stats.paid)}</div>
-              <div class="helper">Už odesláno partnerovi</div>
+              <div class="label">${t.paid}</div>
+              <div class="value">${money(periodStats.paid)}</div>
+              <div class="helper">${t.paidHelp}</div>
             </div>
 
             <div class="card">
-              <div class="label">Objednávky</div>
-              <div class="value">${Number(stats.orders_total || 0)}</div>
-              <div class="helper">Celkem přes referral</div>
+              <div class="label">${t.orders}</div>
+              <div class="value">${safeNumber(periodStats.orders_total)}</div>
+              <div class="helper">${t.ordersHelp}</div>
             </div>
           </section>
 
           <section class="two-col">
             <div class="card">
-              <div class="label">Referral odkaz</div>
-              <div class="linkbox">${escapeHtml(partner.referral_url || "Není nastaveno")}</div>
+              <div class="label">${t.referralLink}</div>
+              <div class="linkbox">${escapeHtml(partner.referral_url || t.notSet)}</div>
 
               <div style="height:18px"></div>
 
-              <div class="label">Slevový kód</div>
-              <div class="code">${escapeHtml(partner.discount_code || "Není nastaveno")}</div>
+              <div class="label">${t.discountCode}</div>
+              <div class="code">${escapeHtml(partner.discount_code || t.notSet)}</div>
 
               <div style="height:22px"></div>
 
-              <div class="label">Poslední objednávka</div>
+              <div class="label">${t.lastOrder}</div>
               <div class="last-order">
                 <div class="mini">
-                  <div class="helper">Datum</div>
-                  <strong>${escapeHtml(lastOrder.at || "Zatím žádná")}</strong>
+                  <div class="helper">${t.date}</div>
+                  <strong>${escapeHtml(lastOrder.at || t.noLastOrder)}</strong>
                 </div>
                 <div class="mini">
-                  <div class="helper">Typ služby</div>
+                  <div class="helper">${t.serviceType}</div>
                   <strong>${escapeHtml(serviceName(lastOrder.type))}</strong>
                 </div>
                 <div class="mini">
-                  <div class="helper">Provize</div>
+                  <div class="helper">${t.commission}</div>
                   <strong>${money(lastOrder.commission_amount)}</strong>
                 </div>
               </div>
             </div>
 
             <div class="card">
-              <div class="label">Zprávy</div>
+              <div class="label">${t.messages}</div>
               ${messageHtml}
             </div>
           </section>
         `
       } catch (err) {
         content.className = "status error"
-        content.textContent = err.message
+        content.textContent = err.message || t.loadError
       }
     }
 
