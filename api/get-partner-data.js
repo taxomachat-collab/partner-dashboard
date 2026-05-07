@@ -1,12 +1,16 @@
 export default async function handler(req, res) {
-    const { ref } = req.query
+    const { ref, period, lang } = req.query
 
     if (!ref) {
         return res.status(400).json({ error: "missing ref" })
     }
 
     try {
-        const makeUrl = `https://hook.eu2.make.com/jy1weiymgyawndtpf36pfdo7fgy1o9pe?ref=${encodeURIComponent(ref)}`
+        const makeUrl =
+            `https://hook.eu2.make.com/jy1weiymgyawndtpf36pfdo7fgy1o9pe` +
+            `?ref=${encodeURIComponent(ref)}` +
+            `&period=${encodeURIComponent(period || "")}` +
+            `&lang=${encodeURIComponent(lang || "cs")}`
 
         const response = await fetch(makeUrl, {
             method: "GET",
@@ -16,6 +20,7 @@ export default async function handler(req, res) {
 
         try {
             const data = JSON.parse(text)
+
             return res.status(response.status).json(data)
         } catch {
             return res.status(500).json({
