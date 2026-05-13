@@ -438,7 +438,7 @@
     const params = new URLSearchParams(window.location.search)
     const ref = params.get("ref")
     const lang = params.get("lang") || "cs"
-    const selectedPeriod = params.get("period") || currentPeriod()
+    const selectedPeriod = cleanValue(params.get("period")) || currentPeriod()
 
     const translations = {
       cs: {
@@ -545,6 +545,21 @@
     csBtn.onclick = () => updateUrl({ lang: "cs" })
     ukBtn.onclick = () => updateUrl({ lang: "uk" })
 
+    function cleanValue(value) {
+      if (value === null || value === undefined) return ""
+
+      let v = String(value).trim()
+
+      if (
+        (v.startsWith('"') && v.endsWith('"')) ||
+        (v.startsWith("'") && v.endsWith("'"))
+      ) {
+        v = v.slice(1, -1).trim()
+      }
+
+      return v
+    }
+
     function currentPeriod() {
       const d = new Date()
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
@@ -565,7 +580,8 @@
     }
 
     function periodLabel(period) {
-      const [year, month] = String(period || currentPeriod()).split("-")
+      const cleanedPeriod = cleanValue(period) || currentPeriod()
+      const [year, month] = cleanedPeriod.split("-")
       const date = new Date(Number(year), Number(month) - 1, 1)
 
       return new Intl.DateTimeFormat(lang === "uk" ? "uk-UA" : "cs-CZ", {
@@ -591,14 +607,15 @@
       next.set("lang", changes.lang || lang)
 
       if (ref) {
-        next.set("period", changes.period || selectedPeriod)
+        next.set("period", cleanValue(changes.period || selectedPeriod))
       }
 
       window.location.search = next.toString()
     }
 
     function safeNumber(value) {
-      const number = Number(value)
+      const cleaned = cleanValue(value)
+      const number = Number(cleaned)
       return Number.isFinite(number) ? number : 0
     }
 
@@ -612,20 +629,33 @@
       }).format(number)
     }
 
+    function normalizeRecord(item) {
+      if (!item) return {}
+
+      if (item.data && typeof item.data === "object" && !Array.isArray(item.data)) {
+        return item.data
+      }
+
+      return item
+    }
+
     function normalizeArray(value) {
       if (!value) return []
-      if (Array.isArray(value)) return value
+      if (Array.isArray(value)) return value.map(normalizeRecord)
 
       if (value.data) {
-        return Array.isArray(value.data) ? value.data : [value.data]
+        const arr = Array.isArray(value.data) ? value.data : [value.data]
+        return arr.map(normalizeRecord)
       }
 
       if (value.Record) {
-        return Array.isArray(value.Record) ? value.Record : [value.Record]
+        const arr = Array.isArray(value.Record) ? value.Record : [value.Record]
+        return arr.map(normalizeRecord)
       }
 
       if (value.record) {
-        return Array.isArray(value.record) ? value.record : [value.record]
+        const arr = Array.isArray(value.record) ? value.record : [value.record]
+        return arr.map(normalizeRecord)
       }
 
       return []
@@ -644,7 +674,7 @@
       if (value === true) return true
       if (value === false) return false
 
-      const normalized = String(value || "").toLowerCase().trim()
+      const normalized = cleanValue(value).toLowerCase()
       if (normalized === "true" || normalized === "1" || normalized === "yes") return true
       if (normalized === "false" || normalized === "0" || normalized === "no") return false
 
@@ -652,19 +682,25 @@
     }
 
     function serviceName(type) {
-      const value = String(type || "").toLowerCase()
+      const cleaned = cleanValue(type)
+      const value = cleaned.toLowerCase()
 
       if (value.includes("register") || value.includes("registrace") || value.includes("registration")) return t.registration
       if (value.includes("vat_return") || value.includes("priznani") || value.includes("přiznání")) return t.vatReturn
 
-      return type || t.noLastOrder
+      return cleaned || t.noLastOrder
     }
 
     function formatDate(value) {
-      if (!value) return t.noLastOrder
+      const cleaned = cleanValue(value)
+      if (!cleaned) return t.noLastOrder
 
-      const d = new Date(value)
-      if (Number.isNaN(d.getTime())) return String(value)
+      if (/^\d{4}-\d{2}$/.test(cleaned)) {
+        return periodLabel(cleaned)
+      }
+
+      const d = new Date(cleaned)
+      if (Number.isNaN(d.getTime())) return cleaned
 
       return new Intl.DateTimeFormat(lang === "uk" ? "uk-UA" : "cs-CZ", {
         day: "2-digit",
@@ -696,7 +732,7 @@
                 <td>${escapeHtml(formatDate(order.created_at))}</td>
                 <td>${escapeHtml(serviceName(order.action))}</td>
                 <td>${money(order.commission_amount)}</td>
-                <td>${escapeHtml(order.commission_status || "pending")}</td>
+                <td>${escapeHtml(cleanValue(order.commission_status) || "pending")}</td>
               </tr>
             `).join("")}
           </tbody>
@@ -756,13 +792,13 @@
           commission_amount: periodStats.last_commission_amount || 0
         }
 
-        partnerRef.textContent = `ref: ${partner.ref || ref}`
+        partnerRef.textContent = `ref: ${cleanValue(partner.ref) || ref}`
 
         const messageHtml = messages.length
           ? messages.map(m => `
               <div class="message">
-                <h3>${escapeHtml(m.title || t.messageFallback)}</h3>
-                <p>${escapeHtml(m.message || "")}</p>
+                <h3>${escapeHtml(cleanValue(m.title) || t.messageFallback)}</h3>
+                <p>${escapeHtml(cleanValue(m.message))}</p>
                 ${m.created_at ? `<div class="helper">${escapeHtml(formatDate(m.created_at))}</div>` : ""}
               </div>
             `).join("")
@@ -773,7 +809,7 @@
           <section class="hero ${active ? "" : "inactive"}">
             <div class="hero-top">
               <div>
-                <h1>${escapeHtml(partner.name || "Partner")}</h1>
+                <h1>${escapeHtml(cleanValue(partner.name) || "Partner")}</h1>
                 <p>${active ? t.heroText : t.inactiveText}</p>
                 <div class="lifetime-note">
                   ${t.lifetime}: ${safeNumber(lifetimeStats.orders_total)} ${t.lifetimeOrders} · ${money(lifetimeStats.pending)} ${t.lifetimePending}
@@ -812,12 +848,12 @@
           <section class="two-col">
             <div class="card">
               <div class="label">${t.referralLink}</div>
-              <div class="linkbox">${escapeHtml(partner.referral_url || t.notSet)}</div>
+              <div class="linkbox">${escapeHtml(cleanValue(partner.referral_url) || t.notSet)}</div>
 
               <div style="height:18px"></div>
 
               <div class="label">${t.discountCode}</div>
-              <div class="code">${escapeHtml(partner.discount_code || t.notSet)}</div>
+              <div class="code">${escapeHtml(cleanValue(partner.discount_code) || t.notSet)}</div>
 
               <div style="height:22px"></div>
 
