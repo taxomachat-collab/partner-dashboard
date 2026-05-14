@@ -802,11 +802,13 @@
       const orders = normalizeArray(data.orders)
       const active = isActive(getField(partner, ["active"], true))
 
-      const lastOrder = {
-        at: getField(periodStats, ["last_order_at", "created_at", "last_created_at"], ""),
-        type: getField(periodStats, ["last_order_type", "last_action", "action"], ""),
-        commission_amount: getField(periodStats, ["last_commission_amount", "commission_amount"], 0)
-      }
+      const lastOrderSource = orders[0] || {}
+
+const lastOrder = {
+  at: getField(lastOrderSource, ["created_at", "paid_at", "last_order_at"], ""),
+  type: getField(lastOrderSource, ["action", "type", "last_order_type"], ""),
+  commission_amount: getField(lastOrderSource, ["commission_amount", "commission", "last_commission_amount"], 0)
+}
 
       const lifetimeOrdersTotal = getField(lifetimeStats, ["orders_total", "total_orders"], 0)
       const lifetimePending = getField(lifetimeStats, ["pending_amount", "pending"], 0)
